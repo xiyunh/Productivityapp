@@ -8,10 +8,11 @@ import { RelationshipScreen } from './components/RelationshipScreen';
 import { SideQuestsScreen } from './components/SideQuestsScreen';
 import { DailyReview } from './components/DailyReview';
 import { CalorieTracker } from './components/CalorieTracker';
+import { HabitScreen } from './components/HabitScreen';
 import { motion } from 'motion/react';
-import { BarChart3, Target, Swords, Users, User, Trophy, Lightbulb, Crown, Flame } from 'lucide-react';
+import { BarChart3, Target, Swords, Users, User, Trophy, Lightbulb, Crown, Flame, Calendar } from 'lucide-react';
 
-type Screen = 'status' | 'skills' | 'dungeons' | 'social' | 'profile' | 'titles' | 'quests' | 'review' | 'calories';
+type Screen = 'status' | 'skills' | 'dungeons' | 'social' | 'profile' | 'titles' | 'quests' | 'review' | 'calories' | 'habits';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('status');
@@ -32,7 +33,7 @@ export default function App() {
 
     switch (currentScreen) {
       case 'status':
-        return <StatusWindow onStatClick={handleStatClick} />;
+        return <StatusWindow onStatClick={handleStatClick} onHabitClick={() => setCurrentScreen('habits')} />;
       case 'skills':
         return <SkillTree />;
       case 'dungeons':
@@ -47,10 +48,12 @@ export default function App() {
         return <DailyReview />;
       case 'calories':
         return <CalorieTracker />;
+      case 'habits':
+        return <HabitScreen />;
       case 'profile':
-        return <StatusWindow onStatClick={handleStatClick} />;
+        return <StatusWindow onStatClick={handleStatClick} onHabitClick={() => setCurrentScreen('habits')} />;
       default:
-        return <StatusWindow onStatClick={handleStatClick} />;
+        return <StatusWindow onStatClick={handleStatClick} onHabitClick={() => setCurrentScreen('habits')} />;
     }
   };
 
@@ -142,6 +145,14 @@ export default function App() {
           label="Calories"
           onClick={() => {
             setCurrentScreen('calories');
+            setSelectedStat(null);
+          }}
+        />
+        <QuickButton
+          icon={Calendar}
+          label="Habits"
+          onClick={() => {
+            setCurrentScreen('habits');
             setSelectedStat(null);
           }}
         />

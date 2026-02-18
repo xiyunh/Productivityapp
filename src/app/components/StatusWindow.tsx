@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { GlassPanel } from './GlassPanel';
 import { StatBar } from './StatBar';
+import { HabitCalendar } from './HabitCalendar';
 import { motion } from 'motion/react';
 import {
   Heart,
@@ -17,9 +18,10 @@ import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Responsi
 
 interface StatusWindowProps {
   onStatClick: (statName: string) => void;
+  onHabitClick?: () => void;
 }
 
-export function StatusWindow({ onStatClick }: StatusWindowProps) {
+export function StatusWindow({ onStatClick, onHabitClick }: StatusWindowProps) {
   const stats = {
     hp: { value: 85, max: 100, color: '#ef4444' },
     mp: { value: 70, max: 100, color: '#3b82f6' },
@@ -43,6 +45,9 @@ export function StatusWindow({ onStatClick }: StatusWindowProps) {
 
   return (
     <div className="status-window">
+      {/* Habit Calendar - Prominently Featured */}
+      <HabitCalendar compact onHabitClick={onHabitClick} />
+
       {/* Player Info */}
       <GlassPanel className="mb-6">
         <div className="text-center">

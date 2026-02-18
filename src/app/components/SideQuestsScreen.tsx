@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { GlassPanel } from './GlassPanel';
 import { motion } from 'motion/react';
-import { Book, Lightbulb, Eye, Flame } from 'lucide-react';
+import { Book, Lightbulb, Eye, Flame, Plus, Zap, Target } from 'lucide-react';
+import { CreateQuestModal, CustomQuest } from './CreateQuestModal';
+import { recordCompletion } from './HabitCalendar';
 
 interface Hobby {
   id: string;
@@ -83,6 +85,42 @@ function Brain(props: any) {
 }
 
 export function SideQuestsScreen() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [customQuests, setCustomQuests] = useState<CustomQuest[]>([]);
+
+  // Load custom quests from localStorage
+  useEffect(() => {
+    const savedQuests = localStorage.getItem('customQuests');
+    if (savedQuests) {
+      setCustomQuests(JSON.parse(savedQuests));
+    }
+  }, []);
+
+  // Save custom quests to localStorage
+  const saveQuests = (quests: CustomQuest[]) => {
+    setCustomQuests(quests);
+    localStorage.setItem('customQuests', JSON.stringify(quests));
+  };
+
+  const handleSaveQuest = (quest: CustomQuest) => {
+    const updatedQuests = [...customQuests, quest];
+    saveQuests(updatedQuests);
+    setIsModalOpen(false);
+  };
+
+  const handleCompleteQuest = (questId: string) => {
+    const updatedQuests = customQuests.map(q =>
+      q.id === questId ? { ...q, completed: true } : q
+    );
+    saveQuests(updatedQuests);
+    recordCompletion('custom');
+  };
+
+  const handleDeleteQuest = (questId: string) => {
+    const updatedQuests = customQuests.filter(q => q.id !== questId);
+    saveQuests(updatedQuests);
+  };
+
   return (
     <div className="side-quests-screen">
       <GlassPanel className="mb-6">
@@ -91,6 +129,90 @@ export function SideQuestsScreen() {
           Side Quests & Hobbies
         </h1>
         <p className="page-subtitle">Cultivate identity and earn bonus XP</p>
+      </GlassPanel>
+
+      {/* Custom Quests Section */}
+      <GlassPanel className="mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="section-title flex items-center gap-2">
+            <Target className="w-5 h-5 text-blue-400" />
+            Custom Quests
+          </h2>
+          <motion.button
+            className="create-quest-btn"
+            onClick={() => setIsModalOpen(true)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create</span>
+          </motion.button>
+        </div>
+
+        {customQuests.length === 0 ? (
+          <div className="custom-quests-empty">
+            <Zap className="w-12 h-12 text-blue-400 opacity-30 mb-3" />
+            <p className="custom-quests-empty-text">No custom quests yet</p>
+            <p className="custom-quests-empty-subtext">
+              Create your own quests to level up specific stats
+            </p>
+          </div>
+        ) : (
+          <div className="custom-quests-list">
+            {customQuests.map((quest, index) => (
+              <motion.div
+                key={quest.id}
+                className={`custom-quest-card ${quest.completed ? 'completed' : ''}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+              >
+                <div className="custom-quest-header">
+                  <h3 className="custom-quest-title">{quest.title}</h3>
+                  {quest.completed && (
+                    <span className="custom-quest-completed-badge">✓ Completed</span>
+                  )}
+                </div>
+                
+                <p className="custom-quest-description">{quest.description}</p>
+                
+                <div className="custom-quest-rewards">
+                  <div className="custom-quest-reward">
+                    <Zap className="w-4 h-4 text-yellow-400" />
+                    <span>{quest.xpReward} XP</span>
+                  </div>
+                  {quest.statRewards.map((reward, i) => (
+                    <div key={i} className="custom-quest-reward">
+                      <TrendingUp className="w-4 h-4 text-blue-400" />
+                      <span>+{reward.amount} {reward.stat}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="custom-quest-actions">
+                  {!quest.completed && (
+                    <motion.button
+                      className="custom-quest-btn custom-quest-btn-complete"
+                      onClick={() => handleCompleteQuest(quest.id)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Complete
+                    </motion.button>
+                  )}
+                  <motion.button
+                    className="custom-quest-btn custom-quest-btn-delete"
+                    onClick={() => handleDeleteQuest(quest.id)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Delete
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </GlassPanel>
 
       {/* Identity Clarity Stat */}
@@ -209,6 +331,13 @@ export function SideQuestsScreen() {
           ))}
         </div>
       </GlassPanel>
+
+      {/* Create Quest Modal */}
+      <CreateQuestModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveQuest}
+      />
     </div>
   );
 }

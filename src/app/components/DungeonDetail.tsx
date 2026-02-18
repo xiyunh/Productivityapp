@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Trophy, Flame, CheckCircle2, Circle, Swords, TrendingUp } from 'lucide-react';
 import { GlassPanel } from './GlassPanel';
+import { recordCompletion } from './HabitCalendar';
 
 interface Subtask {
   id: string;
@@ -48,6 +49,15 @@ export function DungeonDetail({ quest, onClose }: DungeonDetailProps) {
     setSubtasks(prev =>
       prev.map(st => st.id === id ? { ...st, completed: !st.completed } : st)
     );
+  };
+
+  const handleCompleteQuest = () => {
+    if (progress === 100) {
+      recordCompletion('dungeon');
+      // Show success feedback
+      alert('Dungeon completed! Streak updated!');
+      onClose();
+    }
   };
 
   const difficultyColor = difficultyColors[quest.difficulty];
@@ -209,9 +219,10 @@ export function DungeonDetail({ quest, onClose }: DungeonDetailProps) {
             }}
             whileHover={{ scale: 1.02, boxShadow: `0 6px 30px ${difficultyColor}66` }}
             whileTap={{ scale: 0.98 }}
-            disabled={progress === 100}
+            disabled={progress !== 100}
+            onClick={handleCompleteQuest}
           >
-            {progress === 100 ? 'Dungeon Complete!' : progress > 0 ? 'Continue Quest' : 'Begin Dungeon'}
+            {progress === 100 ? 'Complete Dungeon!' : progress > 0 ? 'Continue Quest' : 'Begin Dungeon'}
           </motion.button>
         </motion.div>
       </motion.div>
